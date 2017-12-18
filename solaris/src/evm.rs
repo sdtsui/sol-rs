@@ -232,6 +232,14 @@ impl<'a> ethabi::Caller for &'a mut Evm {
     }
 }
 
+/// converts an `ethcore::log_entry::LogEntry` to an `ethabi::RawLog`
+/// since the events in a contract derived with `ethabi` can only
+/// be parsed from `ethabi::RawLog` (via `event.parse_log(raw_log`).
+fn log_entry_to_raw_log(log_entry: &ethcore::log_entry::LogEntry) -> ethabi::RawLog {
+	let topics: Vec<ethabi::Hash> = log_entry.topics.iter().map(|x| x.0).collect();
+	ethabi::RawLog::from((topics, log_entry.data.clone()))
+}
+
 // TODO [snd] hopefully one day the `vm` crate in the parity repo
 // will use the `primitives` crate and we won't have to convert
 // between those functionally identical types
