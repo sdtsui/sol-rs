@@ -240,6 +240,16 @@ fn log_entry_to_raw_log(log_entry: &ethcore::log_entry::LogEntry) -> ethabi::Raw
 	ethabi::RawLog::from((topics, log_entry.data.clone()))
 }
 
+/// we should probably move this inside the `Topic` type in the `ethabi` crate.
+fn is_in_topic<T: PartialEq>(topic: &ethabi::Topic<T>, maybe_value: Option<&T>) -> bool {
+    match (topic, maybe_value) {
+        (&ethabi::Topic::Any, None) => true,
+        (&ethabi::Topic::OneOf(ref one_of), Some(value)) => one_of.contains(value),
+        (&ethabi::Topic::This(ref this), Some(value)) => this == value,
+        _ => false
+    }
+}
+
 // TODO [snd] hopefully one day the `vm` crate in the parity repo
 // will use the `primitives` crate and we won't have to convert
 // between those functionally identical types
